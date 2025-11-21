@@ -55,11 +55,12 @@ class DashboardPage extends ConsumerWidget {
                           return c.dueDate.isBefore(today);
                         }).toList();
 
-                        // Clientes a vencer em 7 dias (para a lista abaixo)
+                        // Clientes a vencer em 3 dias (para a lista abaixo)
                         final expiringClients = clients.where((c) {
                           final diff = c.dueDate.difference(today).inDays;
-                          return diff >= 0 && diff <= 7;
-                        }).toList();
+                          return diff >= 0 && diff <= 3;
+                        }).toList()
+                          ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
                         return Column(
                           children: [

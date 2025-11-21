@@ -37,3 +37,13 @@ final appVersionProvider = FutureProvider<String>((ref) async {
   final info = await PackageInfo.fromPlatform();
   return 'v${info.version} (build ${info.buildNumber})';
 });
+
+// Filtros de Clientes
+enum ClientFilter {
+  threeDays,
+  active,
+  expired,
+  all
+}
+
+final clientFilterProvider = StateProvider<ClientFilter>((ref) => ClientFilter.threeDays);

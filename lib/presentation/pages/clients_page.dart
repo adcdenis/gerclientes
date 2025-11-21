@@ -23,7 +23,27 @@ class ClientsPage extends ConsumerWidget {
       body: clientsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Erro: $err')),
-        data: (clients) {
+        data: (clientsData) {
+          final filter = ref.watch(clientFilterProvider);
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+
+          final filteredClients = clientsData.where((c) {
+            final diff = c.dueDate.difference(today).inDays;
+            switch (filter) {
+              case ClientFilter.threeDays:
+                return diff >= 0 && diff <= 3;
+              case ClientFilter.active:
+                return !c.dueDate.isBefore(today);
+              case ClientFilter.expired:
+                return c.dueDate.isBefore(today);
+              case ClientFilter.all:
+                return true;
+            }
+          }).toList()
+            ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+          
+          final clients = filteredClients;
           return serversAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, st) => Center(child: Text('Erro ao carregar servidores: $e')),
@@ -45,6 +65,41 @@ class ClientsPage extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  _FilterChip(
+                                    label: '3 dias',
+                                    icon: Icons.schedule,
+                                    selected: ref.watch(clientFilterProvider) == ClientFilter.threeDays,
+                                    onSelected: (v) => ref.read(clientFilterProvider.notifier).state = ClientFilter.threeDays,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  _FilterChip(
+                                    label: 'Ativos',
+                                    icon: Icons.check_circle,
+                                    selected: ref.watch(clientFilterProvider) == ClientFilter.active,
+                                    onSelected: (v) => ref.read(clientFilterProvider.notifier).state = ClientFilter.active,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  _FilterChip(
+                                    label: 'Vencidos',
+                                    icon: Icons.warning,
+                                    selected: ref.watch(clientFilterProvider) == ClientFilter.expired,
+                                    onSelected: (v) => ref.read(clientFilterProvider.notifier).state = ClientFilter.expired,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  _FilterChip(
+                                    label: 'Todos',
+                                    icon: Icons.list,
+                                    selected: ref.watch(clientFilterProvider) == ClientFilter.all,
+                                    onSelected: (v) => ref.read(clientFilterProvider.notifier).state = ClientFilter.all,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             Text('${clients.length} cliente(s)', style: const TextStyle(fontWeight: FontWeight.w600)),
                             const SizedBox(height: 8),
                             ListView.separated(
@@ -193,6 +248,55 @@ class ClientsPage extends ConsumerWidget {
     if (confirmed == true && client.id != null) {
       await ref.read(clientRepositoryProvider).delete(client.id!);
     }
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final ValueChanged<bool> onSelected;
+
+  const _FilterChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+      selected: selected,
+      onSelected: onSelected,
+      showCheckmark: false,
+      selectedColor: Theme.of(context).colorScheme.primary,
+      labelStyle: TextStyle(
+        color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
+        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+        fontSize: 12,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: selected ? Colors.transparent : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+        ),
+      ),
+    );
   }
 }
 
