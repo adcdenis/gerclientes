@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gerclientes/data/models/server_model.dart';
 import 'package:gerclientes/state/providers.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gerclientes/presentation/widgets/server_card.dart';
 
 class ServersPage extends ConsumerWidget {
   const ServersPage({super.key});
@@ -19,7 +20,6 @@ class ServersPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Erro: $err')),
         data: (servers) {
-          final cs = Theme.of(context).colorScheme;
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Card(
@@ -38,31 +38,10 @@ class ServersPage extends ConsumerWidget {
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (ctx, i) {
                         final s = servers[i];
-                        return Card(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () => context.go('/servers/${s.id}/edit', extra: s),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: cs.outlineVariant),
-                              ),
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(s.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () => _confirmDelete(context, ref, s),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        return ServerCard(
+                          server: s,
+                          onTap: () => context.go('/servers/${s.id}/edit', extra: s),
+                          onDelete: () => _confirmDelete(context, ref, s),
                         );
                       },
                     ),

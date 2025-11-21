@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gerclientes/data/models/plan_model.dart';
 import 'package:gerclientes/state/providers.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gerclientes/presentation/widgets/plan_card.dart';
 
 class PlansPage extends ConsumerWidget {
   const PlansPage({super.key});
@@ -19,7 +20,6 @@ class PlansPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Erro: $err')),
         data: (plans) {
-          final cs = Theme.of(context).colorScheme;
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Card(
@@ -38,38 +38,10 @@ class PlansPage extends ConsumerWidget {
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (ctx, i) {
                         final p = plans[i];
-                        return Card(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () => context.go('/plans/${p.id}/edit', extra: p),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: cs.outlineVariant),
-                              ),
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(p.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                                        const SizedBox(height: 4),
-                                        Text('R\$ ${p.value.toStringAsFixed(2)}', style: const TextStyle(fontSize: 14)),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () => _confirmDelete(context, ref, p),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        return PlanCard(
+                          plan: p,
+                          onTap: () => context.go('/plans/${p.id}/edit', extra: p),
+                          onDelete: () => _confirmDelete(context, ref, p),
                         );
                       },
                     ),

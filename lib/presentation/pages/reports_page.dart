@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:gerclientes/state/providers.dart';
 import 'package:gerclientes/domain/report_export.dart';
+import 'package:gerclientes/presentation/widgets/client_card.dart';
 
 class ReportsPage extends ConsumerStatefulWidget {
   const ReportsPage({super.key});
@@ -48,8 +49,6 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     final clientsAsync = ref.watch(clientsProvider);
     final plansAsync = ref.watch(plansProvider);
     final serversAsync = ref.watch(serversProvider);
-    final cs = Theme.of(context).colorScheme;
-    final df = DateFormat('dd/MM/yyyy');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -136,7 +135,6 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                           final serverById = { for (final s in servers) s.id: s.name };
                           final planById = { for (final p in plans) p.id: p.name };
                           final planValById = { for (final p in plans) p.id: p.value };
-                          final currency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -149,65 +147,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                                 itemBuilder: (ctx, i) {
                                   final c = clients[i];
-                                  return Card(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    elevation: 0,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: cs.outlineVariant),
-                                      ),
-                                      padding: const EdgeInsets.all(12),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(c.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                                          const SizedBox(height: 8),
-                                          Table(
-                                            columnWidths: const {0: FlexColumnWidth(), 1: FlexColumnWidth()},
-                                            defaultVerticalAlignment: TableCellVerticalAlignment.top,
-                                            children: [
-                                              TableRow(children: [
-                                                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                  Text('Email:', style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
-                                                  const SizedBox(height: 4),
-                                                  Text(c.email ?? '-', style: const TextStyle(fontSize: 14)),
-                                                ]),
-                                                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                  Text('Telefone:', style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
-                                                  const SizedBox(height: 4),
-                                                  Text(c.phone ?? '-', style: const TextStyle(fontSize: 14)),
-                                                ]),
-                                              ]),
-                                              TableRow(children: [
-                                                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                  Text('Servidor:', style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
-                                                  const SizedBox(height: 4),
-                                                  Text(c.serverId != null ? (serverById[c.serverId] ?? '-') : '-', style: const TextStyle(fontSize: 14)),
-                                                ]),
-                                                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                  Text('Plano:', style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
-                                                  const SizedBox(height: 4),
-                                                  Text(c.planId != null ? (planById[c.planId] ?? '-') : '-', style: const TextStyle(fontSize: 14)),
-                                                ]),
-                                              ]),
-                                              TableRow(children: [
-                                                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                  Text('Vencimento:', style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
-                                                  const SizedBox(height: 4),
-                                                  Text(df.format(c.dueDate), style: const TextStyle(fontSize: 14)),
-                                                ]),
-                                                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                  Text('Valor:', style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
-                                                  const SizedBox(height: 4),
-                                                  Text(c.planId != null && planValById[c.planId] != null ? currency.format(planValById[c.planId]) : '-', style: const TextStyle(fontSize: 14)),
-                                                ]),
-                                              ]),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  return ClientCard(
+                                    client: c,
+                                    serverName: c.serverId != null ? (serverById[c.serverId] ?? '-') : '-',
+                                    planName: c.planId != null ? (planById[c.planId] ?? '-') : '-',
+                                    planValue: c.planId != null ? planValById[c.planId] : null,
+                                    showActions: false, // No actions in reports for now
                                   );
                                 },
                               ),

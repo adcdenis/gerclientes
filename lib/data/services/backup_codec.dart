@@ -30,15 +30,13 @@ class BackupCodec {
   // Histórico removido do backup: não há cálculo de órfãos ou filtros
   /// Gera um Map pronto para JSON contendo todas as entidades.
   static Future<Map<String, dynamic>> encode(AppDatabase db) async {
-    final counters = await db.getAllCounters();
-    final categories = await db.getAllCategories();
+    // final counters = await db.getAllCounters();
+    // final categories = await db.getAllCategories();
     final servers = await db.getAllServers();
     final plans = await db.getAllPlans();
     final clients = await db.getAllClients();
     return {
       'version': 1,
-      'counters': counters.map((c) => c.toJson()).toList(),
-      'categories': categories.map((c) => c.toJson()).toList(),
       'servers': servers.map((c) => c.toJson()).toList(),
       'plans': plans.map((c) => c.toJson()).toList(),
       'clients': clients.map((c) => c.toJson()).toList(),
@@ -62,8 +60,9 @@ class BackupCodec {
     }
 
     requireKey<int>('version', (v) => v is int);
-    requireKey<List>('counters', (v) => v is List);
-    requireKey<List>('categories', (v) => v is List);
+    // Counters e Categories agora são opcionais/legado
+    // requireKey<List>('counters', (v) => v is List);
+    // requireKey<List>('categories', (v) => v is List);
     requireKey<List>('servers', (v) => v is List);
     requireKey<List>('plans', (v) => v is List);
     requireKey<List>('clients', (v) => v is List);
@@ -143,6 +142,10 @@ class BackupCodec {
       if (m is! Map<String, dynamic>) { errors.add('[clients[$i]] não é um objeto'); continue; }
       if (m['id'] is! num) errors.add('[clients[$i]] id obrigatorio (num)');
       if (m['name'] is! String) errors.add('[clients[$i]] name obrigatorio (string)');
+      if (m['user'] != null && m['user'] is! String) errors.add('[clients[$i]] user opcional (string)');
+      if (m['email'] != null && m['email'] is! String) errors.add('[clients[$i]] email opcional (string)');
+      if (m['phone'] != null && m['phone'] is! String) errors.add('[clients[$i]] phone opcional (string)');
+      if (m['observation'] != null && m['observation'] is! String) errors.add('[clients[$i]] observation opcional (string)');
       if (m['dueDate'] == null) {
         errors.add('[clients[$i]] dueDate obrigatorio');
       } else {
