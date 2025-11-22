@@ -81,7 +81,7 @@ class ClientCard extends StatelessWidget {
                 children: [
               // Header com nome e ações
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.fromLTRB(16, 16, showActions ? 72 : 16, 16),
                 decoration: BoxDecoration(
                   color: cs.primaryContainer.withValues(alpha: 0.3),
                   borderRadius: const BorderRadius.only(
@@ -186,50 +186,49 @@ class ClientCard extends StatelessWidget {
           ),
           if (showActions && (onRenew != null || onWhatsApp != null || onDelete != null))
             Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (onRenew != null)
-                      IconButton(
-                        onPressed: onRenew,
-                        icon: Icon(Icons.autorenew, color: cs.primary),
-                        tooltip: 'Renovar ( +30 dias )',
-                        iconSize: 18,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(width: 24, height: 24),
-                      ),
-                    if (onRenew != null && (onWhatsApp != null || onDelete != null))
-                      const SizedBox(width: 4),
-                    if (onWhatsApp != null)
-                      IconButton(
-                        onPressed: onWhatsApp,
-                        icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
-                        tooltip: 'WhatsApp',
-                        iconSize: 18,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(width: 24, height: 24),
-                      ),
-                    if (onWhatsApp != null && onDelete != null)
-                      const SizedBox(width: 4),
-                    if (onDelete != null)
-                      IconButton(
-                        onPressed: onDelete,
-                        icon: Icon(Icons.delete_outline, color: cs.onSurfaceVariant),
-                        tooltip: 'Excluir',
-                        iconSize: 18,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints.tightFor(width: 24, height: 24),
-                      ),
-                  ],
-                ),
+              right: 6,
+              top: 6,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onRenew != null)
+                    IconButton(
+                      onPressed: onRenew,
+                      icon: Icon(Icons.autorenew, color: cs.primary),
+                      tooltip: 'Renovar ( +30 dias )',
+                      iconSize: 14,
+                      padding: EdgeInsets.zero,
+                      splashRadius: 12,
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                      constraints: const BoxConstraints.tightFor(width: 18, height: 18),
+                    ),
+                  if (onRenew != null && (onWhatsApp != null || onDelete != null))
+                    const SizedBox(width: 1),
+                  if (onWhatsApp != null)
+                    IconButton(
+                      onPressed: onWhatsApp,
+                      icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
+                      tooltip: 'WhatsApp',
+                      iconSize: 14,
+                      padding: EdgeInsets.zero,
+                      splashRadius: 12,
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                      constraints: const BoxConstraints.tightFor(width: 18, height: 18),
+                    ),
+                  if (onWhatsApp != null && onDelete != null)
+                    const SizedBox(width: 1),
+                  if (onDelete != null)
+                    IconButton(
+                      onPressed: onDelete,
+                      icon: Icon(Icons.delete_outline, color: cs.onSurfaceVariant),
+                      tooltip: 'Excluir',
+                      iconSize: 14,
+                      padding: EdgeInsets.zero,
+                      splashRadius: 12,
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                      constraints: const BoxConstraints.tightFor(width: 18, height: 18),
+                    ),
+                ],
               ),
             ),
         ],

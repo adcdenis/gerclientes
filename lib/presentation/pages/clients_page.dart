@@ -143,6 +143,18 @@ class ClientsPage extends ConsumerWidget {
   }
 
   Future<void> _renewClient(BuildContext context, WidgetRef ref, Client client) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar Renovação'),
+        content: const Text('Deseja renovar o cliente por mais 30 dias?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirmar')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     final newDue = client.dueDate.add(const Duration(days: 30));
     final updated = client.copyWith(dueDate: newDue);
     await ref.read(clientRepositoryProvider).update(updated);

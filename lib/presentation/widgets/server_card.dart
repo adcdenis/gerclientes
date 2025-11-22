@@ -38,7 +38,7 @@ class ServerCard extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.fromLTRB(16, 16, onDelete != null ? 56 : 16, 16),
                 child: Row(
                   children: [
                 Container(
@@ -68,27 +68,22 @@ class ServerCard extends StatelessWidget {
           ),
           if (onDelete != null)
             Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: onDelete,
-                      icon: Icon(Icons.delete_outline, color: cs.onSurfaceVariant),
-                      tooltip: 'Excluir servidor',
-                      iconSize: 18,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints.tightFor(width: 24, height: 24),
-                    ),
-                  ],
-                ),
+              right: 6,
+              top: 6,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: onDelete,
+                    icon: Icon(Icons.delete_outline, color: cs.onSurfaceVariant),
+                    tooltip: 'Excluir servidor',
+                    iconSize: 14,
+                    padding: EdgeInsets.zero,
+                    splashRadius: 12,
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+                    constraints: const BoxConstraints.tightFor(width: 18, height: 18),
+                  ),
+                ],
               ),
             ),
         ],
