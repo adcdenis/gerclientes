@@ -61,8 +61,9 @@ class ClientsPage extends ConsumerWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: Card(
                       elevation: 0,
+                      clipBehavior: Clip.antiAlias,
                       child: Padding(
-                        padding: const EdgeInsets.all(12.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -76,21 +77,21 @@ class ClientsPage extends ConsumerWidget {
                                     selected: ref.watch(clientFilterProvider) == ClientFilter.threeDays,
                                     onSelected: (v) => ref.read(clientFilterProvider.notifier).state = ClientFilter.threeDays,
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 2),
                                   _FilterChip(
                                     label: 'Ativos',
                                     icon: Icons.check_circle,
                                     selected: ref.watch(clientFilterProvider) == ClientFilter.active,
                                     onSelected: (v) => ref.read(clientFilterProvider.notifier).state = ClientFilter.active,
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 2),
                                   _FilterChip(
                                     label: 'Vencidos',
                                     icon: Icons.warning,
                                     selected: ref.watch(clientFilterProvider) == ClientFilter.expired,
                                     onSelected: (v) => ref.read(clientFilterProvider.notifier).state = ClientFilter.expired,
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 2),
                                   _FilterChip(
                                     label: 'Todos',
                                     icon: Icons.list,
@@ -293,18 +294,19 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilterChip(
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+      visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 0),
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
-            size: 14,
+            size: 12,
             color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 12)),
+          Text(label, style: const TextStyle(fontSize: 11)),
         ],
       ),
       selected: selected,
@@ -314,10 +316,10 @@ class _FilterChip extends StatelessWidget {
       labelStyle: TextStyle(
         color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
         fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
+        fontSize: 11,
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: selected ? Colors.transparent : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         ),
@@ -427,22 +429,28 @@ class _ClientFormPageState extends ConsumerState<ClientFormPage> {
               ),
               const SizedBox(height: 16),
               serversAsync.when(
-                data: (servers) => DropdownButtonFormField<int>(
+                data: (servers) {
+                  final sorted = [...servers]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+                  return DropdownButtonFormField<int>(
                   initialValue: _selectedServerId,
                   decoration: const InputDecoration(labelText: 'Servidor'),
-                  items: servers.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
+                  items: sorted.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))).toList(),
                   onChanged: (v) => setState(() => _selectedServerId = v),
-                ),
+                  );
+                },
                 loading: () => const LinearProgressIndicator(),
                 error: (e, _) => Text('Erro ao carregar servidores: $e'),
               ),
               plansAsync.when(
-                data: (plans) => DropdownButtonFormField<int>(
+                data: (plans) {
+                  final sorted = [...plans]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+                  return DropdownButtonFormField<int>(
                   initialValue: _selectedPlanId,
                   decoration: const InputDecoration(labelText: 'Plano'),
-                  items: plans.map((p) => DropdownMenuItem(value: p.id, child: Text(p.name))).toList(),
+                  items: sorted.map((p) => DropdownMenuItem(value: p.id, child: Text(p.name))).toList(),
                   onChanged: (v) => setState(() => _selectedPlanId = v),
-                ),
+                  );
+                },
                 loading: () => const LinearProgressIndicator(),
                 error: (e, _) => Text('Erro ao carregar planos: $e'),
               ),

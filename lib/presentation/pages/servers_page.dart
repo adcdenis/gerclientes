@@ -20,6 +20,7 @@ class ServersPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Erro: $err')),
         data: (servers) {
+          final sortedServers = [...servers]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Card(
@@ -29,15 +30,15 @@ class ServersPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${servers.length} servidor(es)', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text('${sortedServers.length} servidor(es)', style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: servers.length,
+                      itemCount: sortedServers.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (ctx, i) {
-                        final s = servers[i];
+                        final s = sortedServers[i];
                         return ServerCard(
                           server: s,
                           onTap: () => context.go('/servers/${s.id}/edit', extra: s),

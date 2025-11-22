@@ -68,53 +68,7 @@ class BackupCodec {
     requireKey<List>('clients', (v) => v is List);
     // Histórico não é mais suportado
 
-    // Counters
-    final counters = (data['counters'] as List<dynamic>? ?? []);
-    final counterIds = <int>{};
-    for (var i = 0; i < counters.length; i++) {
-      final m = counters[i];
-      if (m is! Map<String, dynamic>) {
-        errors.add('[counters[$i]] não é um objeto');
-        continue;
-      }
-      if (m['id'] is! num) {
-        errors.add('[counters[$i]] id obrigatorio (num)');
-      } else {
-        counterIds.add((m['id'] as num).toInt());
-      }
-      if (m['name'] is! String) errors.add('[counters[$i]] name obrigatorio (string)');
-      if (m['description'] != null && m['description'] is! String) errors.add('[counters[$i]] description opcional (string)');
-      if (m['eventDate'] == null) {
-        errors.add('[counters[$i]] eventDate obrigatorio');
-      } else {
-        try { _dateFromJson(m['eventDate']); } catch (_) { errors.add('[counters[$i]] eventDate inválido'); }
-      }
-      if (m['category'] != null && m['category'] is! String) errors.add('[counters[$i]] category opcional (string)');
-      // Campos de corridas (todos opcionais para manter retrocompatibilidade)
-      if (m['status'] != null && m['status'] is! String) errors.add('[counters[$i]] status opcional (string)');
-      if (m['distanceKm'] != null && m['distanceKm'] is! num) errors.add('[counters[$i]] distanceKm opcional (num)');
-      if (m['price'] != null && m['price'] is! num) errors.add('[counters[$i]] price opcional (num)');
-      if (m['registrationUrl'] != null && m['registrationUrl'] is! String) errors.add('[counters[$i]] registrationUrl opcional (string)');
-      if (m['finishTime'] != null && m['finishTime'] is! String) errors.add('[counters[$i]] finishTime opcional (string HH:mm:ss)');
-      if (m['createdAt'] == null) {
-        errors.add('[counters[$i]] createdAt obrigatorio');
-      } else {
-        try { _dateFromJson(m['createdAt']); } catch (_) { errors.add('[counters[$i]] createdAt inválido'); }
-      }
-      if (m['updatedAt'] != null) {
-        try { _dateFromJson(m['updatedAt']); } catch (_) { errors.add('[counters[$i]] updatedAt inválido'); }
-      }
-    }
-
-    // Categories
-    final categories = (data['categories'] as List<dynamic>? ?? []);
-    for (var i = 0; i < categories.length; i++) {
-      final m = categories[i];
-      if (m is! Map<String, dynamic>) { errors.add('[categories[$i]] não é um objeto'); continue; }
-      if (m['id'] is! num) errors.add('[categories[$i]] id obrigatorio (num)');
-      if (m['name'] is! String) errors.add('[categories[$i]] name obrigatorio (string)');
-      if (m['normalized'] is! String) errors.add('[categories[$i]] normalized obrigatorio (string)');
-    }
+    // Ignora chaves legadas 'counters' e 'categories' se presentes
 
     // Servers
     final servers = (data['servers'] as List<dynamic>? ?? []);
@@ -167,39 +121,9 @@ class BackupCodec {
       await db.customStatement('DELETE FROM clients');
       await db.customStatement('DELETE FROM servers');
       await db.customStatement('DELETE FROM plans');
-      await db.customStatement('DELETE FROM categories');
-      await db.customStatement('DELETE FROM corridas');
+      // Ignora tabelas legadas: não deleta counters/categories
 
-      // Recria categorias
-      final categories = (data['categories'] as List<dynamic>? ?? []);
-      for (final cat in categories) {
-        final m = cat as Map<String, dynamic>;
-        await db.upsertCategoryRaw(
-          id: (m['id'] as num).toInt(),
-          name: m['name'] as String,
-          normalized: m['normalized'] as String,
-        );
-      }
-
-      // Recria contadores
-      final counters = (data['counters'] as List<dynamic>? ?? []);
-      for (final c in counters) {
-        final m = c as Map<String, dynamic>;
-        await db.upsertCounterRaw(
-          id: (m['id'] as num).toInt(),
-          name: m['name'] as String,
-          description: m['description'] as String?,
-          eventDate: _dateFromJson(m['eventDate']),
-          category: m['category'] as String?,
-          status: (m['status'] as String?) ?? 'pretendo_ir',
-          distanceKm: (m['distanceKm'] as num?)?.toDouble() ?? 0.0,
-          price: (m['price'] as num?)?.toDouble(),
-          registrationUrl: m['registrationUrl'] as String?,
-          finishTime: m['finishTime'] as String?,
-          createdAt: _dateFromJson(m['createdAt']),
-          updatedAt: m['updatedAt'] != null ? _dateFromJson(m['updatedAt']) : null,
-        );
-      }
+      // Ignora restauração de categorias e contadores legados
 
 
 

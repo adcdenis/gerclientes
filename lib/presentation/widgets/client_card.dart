@@ -57,24 +57,26 @@ class ClientCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 2,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
+      child: Stack(
+        children: [
+          InkWell(
             borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                cs.surface,
-                cs.surfaceContainerHighest.withValues(alpha: 0.3),
-              ],
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            onTap: onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    cs.surface,
+                    cs.surfaceContainerHighest.withValues(alpha: 0.3),
+                  ],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // Header com nome e ações
               Container(
                 padding: const EdgeInsets.all(16),
@@ -88,12 +90,13 @@ class ClientCard extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      constraints: const BoxConstraints.tightFor(width: 26, height: 26),
                       decoration: BoxDecoration(
                         color: cs.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(9),
                       ),
-                      child: Icon(Icons.person, color: cs.primary, size: 24),
+                      alignment: Alignment.center,
+                      child: Icon(Icons.person, color: cs.primary, size: 22),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -126,20 +129,6 @@ class ClientCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (showActions) ...[
-                      if (onWhatsApp != null)
-                        IconButton(
-                          icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
-                          tooltip: 'Enviar mensagem WhatsApp',
-                          onPressed: onWhatsApp,
-                        ),
-                      if (onDelete != null)
-                        IconButton(
-                          icon: Icon(Icons.delete, color: cs.error),
-                          tooltip: 'Excluir cliente',
-                          onPressed: onDelete,
-                        ),
-                    ],
                   ],
                 ),
               ),
@@ -191,7 +180,46 @@ class ClientCard extends StatelessWidget {
               ),
             ],
           ),
-        ),
+          ),
+          ),
+          if (showActions && (onWhatsApp != null || onDelete != null))
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (onWhatsApp != null)
+                      IconButton(
+                        onPressed: onWhatsApp,
+                        icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
+                        tooltip: 'WhatsApp',
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(width: 24, height: 24),
+                      ),
+                    if (onWhatsApp != null && onDelete != null)
+                      const SizedBox(width: 4),
+                    if (onDelete != null)
+                      IconButton(
+                        onPressed: onDelete,
+                        icon: Icon(Icons.delete_outline, color: cs.onSurfaceVariant),
+                        tooltip: 'Excluir',
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(width: 24, height: 24),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -200,14 +228,15 @@ class ClientCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(6),
+          constraints: const BoxConstraints.tightFor(width: 20, height: 20),
           decoration: BoxDecoration(
             color: cs.primaryContainer.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(5),
           ),
+          alignment: Alignment.center,
           child: Icon(icon, size: 16, color: cs.primary),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

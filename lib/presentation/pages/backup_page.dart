@@ -54,9 +54,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                     try {
                       final path = await backup.exportPath();
                       _refresh();
-                      final now = DateTime.now();
-                      final ts =
-                          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+                    final now = DateTime.now();
+                    final ts =
+                        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
                       final subject = sanitizeForShare('Backup GerClientes');
                       final text = sanitizeForShare('Backup exportado em $ts');
                       await Share.shareXFiles(
@@ -79,8 +79,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                 onPressed: () async {
                   try {
                     final imported = await backup.import();
-                    ref.invalidate(corridasProvider);
-                    ref.invalidate(categoriesProvider);
+                    ref.invalidate(clientsProvider);
+                    ref.invalidate(plansProvider);
+                    ref.invalidate(serversProvider);
                     _refresh();
                     if (context.mounted) {
                       ScaffoldMessenger.of(
@@ -214,7 +215,7 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                         .split('\\')
                         .last; // suporta separadores diferentes
                     String? subtitle;
-                    final re = RegExp(r'gercorridas_backup_(\d{8})_(\d{6})');
+                    final re = RegExp(r'gerclientes_backup_(\d{8})_(\d{6})');
                     final m = re.firstMatch(filename);
                     if (m != null) {
                       final d = m.group(1)!; // YYYYMMDD
@@ -229,8 +230,9 @@ class _BackupPageState extends ConsumerState<BackupPage> {
                         onPressed: () async {
                           try {
                             final msg = await backup.importFromPath(path);
-                            ref.invalidate(corridasProvider);
-                            ref.invalidate(categoriesProvider);
+                            ref.invalidate(clientsProvider);
+                            ref.invalidate(plansProvider);
+                            ref.invalidate(serversProvider);
                             _refresh();
                             if (context.mounted) {
                               ScaffoldMessenger.of(

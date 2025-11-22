@@ -20,6 +20,7 @@ class PlansPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Erro: $err')),
         data: (plans) {
+          final sortedPlans = [...plans]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Card(
@@ -29,15 +30,15 @@ class PlansPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${plans.length} plano(s)', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text('${sortedPlans.length} plano(s)', style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: plans.length,
+                      itemCount: sortedPlans.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (ctx, i) {
-                        final p = plans[i];
+                        final p = sortedPlans[i];
                         return PlanCard(
                           plan: p,
                           onTap: () => context.go('/plans/${p.id}/edit', extra: p),

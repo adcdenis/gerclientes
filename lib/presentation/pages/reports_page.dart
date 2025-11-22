@@ -13,25 +13,7 @@ class ReportsPage extends ConsumerStatefulWidget {
 }
 
 class _ReportsPageState extends ConsumerState<ReportsPage> {
-
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-
-  
-
+  ClientFilter _filter = ClientFilter.active;
   
 
   
@@ -73,6 +55,19 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                 loading: () => const LinearProgressIndicator(),
                 error: (e, st) => Text('Erro ao carregar clientes: $e'),
                 data: (clients) {
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final filtered = clients.where((c) {
+                    switch (_filter) {
+                      case ClientFilter.active:
+                        return !c.dueDate.isBefore(today);
+                      case ClientFilter.expired:
+                        return c.dueDate.isBefore(today);
+                      case ClientFilter.all:
+                      case ClientFilter.threeDays:
+                        return true;
+                    }
+                  }).toList();
                   return serversAsync.when(
                     loading: () => const LinearProgressIndicator(),
                     error: (e, st) => Text('Erro ao carregar servidores: $e'),
@@ -85,7 +80,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                           final planById = { for (final p in plans) p.id: p.name };
                           final planValById = { for (final p in plans) p.id: p.value };
                           final currency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-                          final rows = clients.map((c) => ClientReportRow(
+                          final sortedForRows = [...filtered]..sort((a, b) => b.dueDate.compareTo(a.dueDate));
+                          final rows = sortedForRows.map((c) => ClientReportRow(
                             nome: c.name,
                             email: c.email ?? '-',
                             telefone: c.phone ?? '-',
@@ -94,18 +90,41 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                             plano: c.planId != null ? (planById[c.planId] ?? '-') : '-',
                             valor: c.planId != null && planValById[c.planId] != null ? currency.format(planValById[c.planId]) : '-',
                           )).toList();
-                          return Wrap(spacing: 8, runSpacing: 8, children: [
-                            FilledButton.icon(
-                              onPressed: rows.isEmpty ? null : () async { final f = await generateXlsxClientsReport(rows); await shareFile(f, mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); },
-                              icon: const Icon(Icons.grid_on),
-                              label: const Text('Gerar Excel'),
-                            ),
-                            FilledButton.icon(
-                              onPressed: rows.isEmpty ? null : () async { final f = await generatePdfClientsReport(rows); await shareFile(f, mimeType: 'application/pdf'); },
-                              icon: const Icon(Icons.picture_as_pdf),
-                              label: const Text('Gerar PDF'),
-                            ),
-                          ]);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Wrap(spacing: 6, children: [
+                                FilterChip(
+                                  label: const Text('Ativos'),
+                                  selected: _filter == ClientFilter.active,
+                                  onSelected: (_) => setState(() => _filter = ClientFilter.active),
+                                ),
+                                FilterChip(
+                                  label: const Text('Inativos'),
+                                  selected: _filter == ClientFilter.expired,
+                                  onSelected: (_) => setState(() => _filter = ClientFilter.expired),
+                                ),
+                                FilterChip(
+                                  label: const Text('Todos'),
+                                  selected: _filter == ClientFilter.all,
+                                  onSelected: (_) => setState(() => _filter = ClientFilter.all),
+                                ),
+                              ]),
+                              const SizedBox(height: 12),
+                              Wrap(spacing: 8, runSpacing: 8, children: [
+                                FilledButton.icon(
+                                  onPressed: rows.isEmpty ? null : () async { final f = await generateXlsxClientsReport(rows); await shareFile(f, mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); },
+                                  icon: const Icon(Icons.grid_on),
+                                  label: const Text('Gerar Excel'),
+                                ),
+                                FilledButton.icon(
+                                  onPressed: rows.isEmpty ? null : () async { final f = await generatePdfClientsReport(rows); await shareFile(f, mimeType: 'application/pdf'); },
+                                  icon: const Icon(Icons.picture_as_pdf),
+                                  label: const Text('Gerar PDF'),
+                                ),
+                              ]),
+                            ],
+                          );
                         },
                       );
                     },
@@ -132,21 +151,35 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         loading: () => const Center(child: CircularProgressIndicator()),
                         error: (e, st) => Center(child: Text('Erro ao carregar planos: $e')),
                         data: (plans) {
+                          final now = DateTime.now();
+                          final today = DateTime(now.year, now.month, now.day);
+                          final filtered = clients.where((c) {
+                            switch (_filter) {
+                              case ClientFilter.active:
+                                return !c.dueDate.isBefore(today);
+                              case ClientFilter.expired:
+                                return c.dueDate.isBefore(today);
+                              case ClientFilter.all:
+                              case ClientFilter.threeDays:
+                                return true;
+                            }
+                          }).toList();
                           final serverById = { for (final s in servers) s.id: s.name };
                           final planById = { for (final p in plans) p.id: p.name };
                           final planValById = { for (final p in plans) p.id: p.value };
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('${clients.length} cliente(s)', style: const TextStyle(fontWeight: FontWeight.w600)),
+                              Text('${filtered.length} cliente(s)', style: const TextStyle(fontWeight: FontWeight.w600)),
                               const SizedBox(height: 8),
                               ListView.separated(
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
-                                itemCount: clients.length,
+                                itemCount: filtered.length,
                                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                                 itemBuilder: (ctx, i) {
-                                  final c = clients[i];
+                                  final sorted = [...filtered]..sort((a, b) => b.dueDate.compareTo(a.dueDate));
+                                  final c = sorted[i];
                                   return ClientCard(
                                     client: c,
                                     serverName: c.serverId != null ? (serverById[c.serverId] ?? '-') : '-',

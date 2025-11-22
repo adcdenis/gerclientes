@@ -52,7 +52,7 @@ class NoopCloudSyncService implements CloudSyncService {
   late final StreamController<DateTime> _restoreCtrl;
   late final StreamController<DateTime> _backupCtrl;
   bool _auto = false;
-  StreamSubscription? _countersSub;
+  StreamSubscription? _clientsSub;
   Timer? _debounce;
   static const String _prefsKeyAutoSync = 'cloud_auto_sync_enabled';
 
@@ -148,14 +148,14 @@ class NoopCloudSyncService implements CloudSyncService {
   @override
   Future<void> startRealtimeSync() async {
     if (!_auto) return;
-    _countersSub ??= db.watchAllCounters().skip(1).listen((_) => _onLocalChange());
+    _clientsSub ??= db.watchAllClients().skip(1).listen((_) => _onLocalChange());
     // Política: não sincronizar por mudanças de categorias
   }
 
   @override
   Future<void> stopRealtimeSync() async {
-    await _countersSub?.cancel();
-    _countersSub = null;
+    await _clientsSub?.cancel();
+    _clientsSub = null;
     _debounce?.cancel();
     _debounce = null;
   }

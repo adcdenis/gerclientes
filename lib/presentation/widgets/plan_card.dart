@@ -22,74 +22,98 @@ class PlanCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 2,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
+      child: Stack(
+        children: [
+          InkWell(
             borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                cs.surface,
-                cs.surfaceContainerHighest.withValues(alpha: 0.3),
-              ],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.card_membership, color: cs.primary, size: 24),
+            onTap: onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    cs.surface,
+                    cs.surfaceContainerHighest.withValues(alpha: 0.3),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        plan.name,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      constraints: const BoxConstraints.tightFor(width: 26, height: 26),
+                      decoration: BoxDecoration(
+                        color: cs.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(9),
                       ),
-                      const SizedBox(height: 4),
-                      Row(
+                      alignment: Alignment.center,
+                      child: Icon(Icons.card_membership, color: cs.primary, size: 22),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.attach_money, size: 14, color: cs.primary),
-                          const SizedBox(width: 4),
                           Text(
-                            currency.format(plan.value),
+                            plan.name,
                             style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurfaceVariant,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: cs.onSurface,
                             ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(Icons.attach_money, size: 14, color: cs.primary),
+                              const SizedBox(width: 4),
+                              Text(
+                                currency.format(plan.value),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                if (onDelete != null)
-                  IconButton(
-                    icon: Icon(Icons.delete, color: cs.error),
-                    tooltip: 'Excluir plano',
-                    onPressed: onDelete,
-                  ),
-              ],
+              ),
             ),
           ),
-        ),
+          if (onDelete != null)
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: onDelete,
+                      icon: Icon(Icons.delete_outline, color: cs.onSurfaceVariant),
+                      tooltip: 'Excluir plano',
+                      iconSize: 18,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints.tightFor(width: 24, height: 24),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

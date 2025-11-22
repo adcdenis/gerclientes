@@ -49,7 +49,7 @@ class GoogleDriveCloudSyncService implements CloudSyncService {
           ],
   );
 
-  StreamSubscription? _countersSub;
+  StreamSubscription? _clientsSub;
   Timer? _debounce;
   String? _backupFolderId; // cache do id da subpasta de backups
   static const String _prefsKeyAutoSync = 'cloud_auto_sync_enabled';
@@ -398,7 +398,7 @@ class GoogleDriveCloudSyncService implements CloudSyncService {
       try {
         final prefs = await SharedPreferences.getInstance();
         final name = created.name ?? fileMeta.name ?? '';
-        final m = RegExp(r"^gercorridas_backup_(\d{8}_\d{6})\.json").firstMatch(name);
+      final m = RegExp(r"^gerclientes_backup_(\d{8}_\d{6})\.json").firstMatch(name);
         final ts = m?.group(1);
         if (ts != null) {
           await prefs.setString(_prefsKeyLastBackupTs, ts);
@@ -442,7 +442,7 @@ class GoogleDriveCloudSyncService implements CloudSyncService {
     // Busca o arquivo mais recente com padrão de nome do app
     final api = drive.DriveApi(client);
     String spaces = 'drive';
-    String q = "mimeType = 'application/json' and name contains 'gercorridas_backup_'";
+    String q = "mimeType = 'application/json' and name contains 'gerclientes_backup_'";
     if (useDriveAppDataSpace) {
       spaces = 'appDataFolder';
     } else {
@@ -490,7 +490,7 @@ class GoogleDriveCloudSyncService implements CloudSyncService {
     await _cleanupOldBackups(api);
     // Emite evento com a data definida pelo nome do arquivo
     final name = f.name ?? '';
-    final m = RegExp(r"^gercorridas_backup_(\d{8}_\d{6})\.json").firstMatch(name);
+    final m = RegExp(r"^gerclientes_backup_(\d{8}_\d{6})\.json").firstMatch(name);
     if (m != null) {
       final ts = m.group(1)!;
       try {
@@ -510,14 +510,14 @@ class GoogleDriveCloudSyncService implements CloudSyncService {
   @override
   Future<void> startRealtimeSync() async {
     if (!_auto) return;
-    _countersSub ??= db.watchAllCounters().skip(1).listen((_) => _onLocalChange());
+    _clientsSub ??= db.watchAllClients().skip(1).listen((_) => _onLocalChange());
     // Política: não sincronizar por mudanças de categorias
   }
 
   @override
   Future<void> stopRealtimeSync() async {
-    await _countersSub?.cancel();
-    _countersSub = null;
+    await _clientsSub?.cancel();
+    _clientsSub = null;
     _debounce?.cancel();
     _debounce = null;
   }
