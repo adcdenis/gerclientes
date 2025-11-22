@@ -62,27 +62,141 @@ class ServersPage extends ConsumerWidget {
 
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref, Server server) async {
-    final confirmed = await showDialog<bool>(
+    await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Exclusão'),
-        content: Text('Deseja excluir o servidor "${server.name}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Excluir'),
-          ),
-        ],
-      ),
+      builder: (dialogCtx) {
+        return Consumer(builder: (context, ref2, _) {
+          final clientsAsync = ref2.watch(clientsProvider);
+          final serversAsync = ref2.watch(serversProvider);
+          return clientsAsync.when(
+            loading: () => const AlertDialog(title: Text('Carregando...')),
+            error: (e, _) => AlertDialog(title: const Text('Erro'), content: Text('$e')),
+            data: (clients) {
+              var associated = clients.where((c) => c.serverId == server.id).toList();
+              if (associated.isEmpty) {
+                return AlertDialog(
+                  title: const Text('Confirmar Exclusão'),
+                  content: Text('Deseja excluir o servidor "${server.name}"?'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('Cancelar')),
+                    FilledButton(
+                      onPressed: () async {
+                        if (server.id != null) {
+                          await ref2.read(serverRepositoryProvider).delete(server.id!);
+                          if (!dialogCtx.mounted) return;
+                          Navigator.pop(dialogCtx);
+                        }
+                      },
+                      child: const Text('Excluir'),
+                    ),
+                  ],
+                );
+              }
+              final selections = <int, int?>{};
+              return StatefulBuilder(builder: (ctx, setState) {
+                final otherServers = serversAsync.maybeWhen(data: (ss) => ss.where((s) => s.id != server.id).toList(), orElse: () => const []);
+                return AlertDialog(
+                  title: const Text('Servidor em uso'),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Associado a ${associated.length} cliente(s):'),
+                        const SizedBox(height: 12),
+                        Flexible(
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemBuilder: (_, i) {
+                              final c = associated[i];
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          c.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline),
+                                        onPressed: () async {
+                                          if (c.id != null) {
+                                            await ref2.read(clientRepositoryProvider).delete(c.id!);
+                                            ref2.invalidate(clientsProvider);
+                                            setState(() {});
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  if (otherServers.isNotEmpty)
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: DropdownButtonFormField<int>(
+                                            isExpanded: true,
+                                            menuMaxHeight: 240,
+                                            initialValue: selections[c.id ?? i],
+                                            items: otherServers.map((s) => DropdownMenuItem<int>(value: s.id, child: Text(s.name))).toList(),
+                                            onChanged: (v) => setState(() => selections[c.id ?? i] = v),
+                                            decoration: const InputDecoration(hintText: 'Selecione'),
+                                          ),
+                                        ),
+                                    IconButton(
+                                      icon: const Icon(Icons.swap_horiz),
+                                      onPressed: () async {
+                                        final key = c.id ?? i;
+                                        final target = selections[key];
+                                        if (target != null) {
+                                          await ref2.read(clientRepositoryProvider).update(c.copyWith(serverId: target));
+                                          ref2.invalidate(clientsProvider);
+                                          setState(() {
+                                            associated.removeWhere((x) => x.id == c.id);
+                                          });
+                                          if (dialogCtx.mounted) {
+                                            ScaffoldMessenger.of(dialogCtx).showSnackBar(const SnackBar(content: Text('Cliente migrado')));
+                                          }
+                                        }
+                                      },
+                                    ),
+                                      ],
+                                    ),
+                                ],
+                              );
+                            },
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemCount: associated.length,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(dialogCtx), child: const Text('Fechar')),
+                    FilledButton(
+                      onPressed: associated.isEmpty && server.id != null
+                          ? () async {
+                              await ref2.read(serverRepositoryProvider).delete(server.id!);
+                              if (!dialogCtx.mounted) return;
+                              Navigator.pop(dialogCtx);
+                            }
+                          : null,
+                      child: const Text('Excluir servidor'),
+                    ),
+                  ],
+                );
+              });
+            },
+          );
+        });
+      },
     );
-
-    if (confirmed == true && server.id != null) {
-      await ref.read(serverRepositoryProvider).delete(server.id!);
-    }
   }
 }
 

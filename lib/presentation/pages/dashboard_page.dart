@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gerclientes/state/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:gerclientes/presentation/widgets/client_card.dart';
 
 class DashboardPage extends ConsumerWidget {
@@ -227,22 +228,33 @@ class DashboardPage extends ConsumerWidget {
       planValue: planValue,
       user: client.user,
     );
-
-    // Limpar telefone (remover caracteres não numéricos)
-    final phone = client.phone!.replaceAll(RegExp(r'[^0-9]'), '');
-    
-    // Montar URL do WhatsApp Web
+    var phone = client.phone!.replaceAll(RegExp(r'[^0-9]'), '');
+    if (phone.startsWith('55')) {
+      phone = phone.substring(2);
+    }
     final encodedMessage = Uri.encodeComponent(message);
-    final url = Uri.parse('https://wa.me/55$phone?text=$encodedMessage');
-
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível abrir o WhatsApp')),
-        );
+    final hasText = message.trim().isNotEmpty;
+    final candidates = <Uri>[
+      Uri.parse(hasText
+          ? 'whatsapp://send?phone=55$phone&text=$encodedMessage'
+          : 'whatsapp://send?phone=55$phone'),
+      Uri.parse(hasText
+          ? 'whatsapp-business://send?phone=55$phone&text=$encodedMessage'
+          : 'whatsapp-business://send?phone=55$phone'),
+      Uri.parse(hasText
+          ? 'https://api.whatsapp.com/send?phone=55$phone&text=$encodedMessage'
+          : 'https://api.whatsapp.com/send?phone=55$phone'),
+    ];
+    for (final uri in candidates) {
+      if (await canLaunchUrl(uri)) {
+        if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
       }
+    }
+    await Share.share(message);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Abrindo opções de compartilhamento (WhatsApp, etc.)')),
+      );
     }
   }
 

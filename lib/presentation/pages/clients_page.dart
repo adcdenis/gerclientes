@@ -226,25 +226,26 @@ class ClientsPage extends ConsumerWidget {
     }
 
     final encodedMessage = Uri.encodeComponent(message);
+    final hasText = message.trim().isNotEmpty;
 
-    // Tentar abrir via esquema nativo do WhatsApp
-    final whatsappUri = Uri.parse('whatsapp://send?phone=55$phone&text=$encodedMessage');
-    if (await canLaunchUrl(whatsappUri)) {
-      final ok = await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
-      if (ok) return;
+    final candidates = <Uri>[
+      Uri.parse(hasText
+          ? 'whatsapp://send?phone=55$phone&text=$encodedMessage'
+          : 'whatsapp://send?phone=55$phone'),
+      Uri.parse(hasText
+          ? 'whatsapp-business://send?phone=55$phone&text=$encodedMessage'
+          : 'whatsapp-business://send?phone=55$phone'),
+      Uri.parse(hasText
+          ? 'https://api.whatsapp.com/send?phone=55$phone&text=$encodedMessage'
+          : 'https://api.whatsapp.com/send?phone=55$phone'),
+    ];
+
+    for (final uri in candidates) {
+      if (await canLaunchUrl(uri)) {
+        if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+      }
     }
 
-    // Fallback 1: API WhatsApp via navegador/app
-    final webUri = Uri.parse('https://api.whatsapp.com/send?phone=55$phone&text=$encodedMessage');
-    if (await canLaunchUrl(webUri)) {
-      final ok = await launchUrl(webUri, mode: LaunchMode.externalApplication);
-      if (ok) return;
-      // Fallback 1.1: abrir no WebView interno caso não haja navegador
-      final okInApp = await launchUrl(webUri, mode: LaunchMode.inAppWebView);
-      if (okInApp) return;
-    }
-
-    // Fallback 2: abrir folha de compartilhamento para o usuário escolher (inclui WhatsApp se instalado)
     await Share.share(message);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -55,6 +55,8 @@ class AppShell extends ConsumerWidget {
             router.go('/plans');
           } else if (location.startsWith('/clients') && location != '/clients') {
             router.go('/clients');
+          } else if (location.startsWith('/reports')) {
+            router.go('/');
           } else if (location.startsWith('/cloud-backup')) {
             router.go('/backup');
           } else {
