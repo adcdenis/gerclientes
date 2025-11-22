@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gerclientes/data/models/client_model.dart';
 import 'package:gerclientes/state/providers.dart';
@@ -117,6 +118,7 @@ class ClientsPage extends ConsumerWidget {
                                   planName: c.planId != null ? (planById[c.planId] ?? '-') : '-',
                                   planValue: c.planId != null ? planValById[c.planId] : null,
                                   onTap: () => context.go('/clients/${c.id}/edit', extra: c),
+                                  onRenew: () => _renewClient(context, ref, c),
                                   onWhatsApp: () => _sendWhatsAppMessage(context, ref, c, plans),
                                   onDelete: () => _confirmDelete(context, ref, c),
                                 );
@@ -138,6 +140,18 @@ class ClientsPage extends ConsumerWidget {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> _renewClient(BuildContext context, WidgetRef ref, Client client) async {
+    final newDue = client.dueDate.add(const Duration(days: 30));
+    final updated = client.copyWith(dueDate: newDue);
+    await ref.read(clientRepositoryProvider).update(updated);
+    ref.invalidate(clientsProvider);
+    final msg = 'Plano renovado com sucesso.  Próximo vencimento: ${DateFormat('dd/MM/yyyy').format(newDue)}';
+    await Clipboard.setData(ClipboardData(text: msg));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Renovado e mensagem copiada')));
+    }
   }
 
   String _getGreeting() {

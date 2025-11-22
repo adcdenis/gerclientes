@@ -10,6 +10,7 @@ class ClientCard extends StatelessWidget {
   final double? planValue;
   final VoidCallback? onTap;
   final VoidCallback? onWhatsApp;
+  final VoidCallback? onRenew;
   final VoidCallback? onDelete;
   final bool showActions;
 
@@ -21,6 +22,7 @@ class ClientCard extends StatelessWidget {
     this.planValue,
     this.onTap,
     this.onWhatsApp,
+    this.onRenew,
     this.onDelete,
     this.showActions = true,
   });
@@ -182,7 +184,7 @@ class ClientCard extends StatelessWidget {
           ),
           ),
           ),
-          if (showActions && (onWhatsApp != null || onDelete != null))
+          if (showActions && (onRenew != null || onWhatsApp != null || onDelete != null))
             Positioned(
               right: 8,
               top: 8,
@@ -195,6 +197,17 @@ class ClientCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    if (onRenew != null)
+                      IconButton(
+                        onPressed: onRenew,
+                        icon: Icon(Icons.autorenew, color: cs.primary),
+                        tooltip: 'Renovar ( +30 dias )',
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(width: 24, height: 24),
+                      ),
+                    if (onRenew != null && (onWhatsApp != null || onDelete != null))
+                      const SizedBox(width: 4),
                     if (onWhatsApp != null)
                       IconButton(
                         onPressed: onWhatsApp,

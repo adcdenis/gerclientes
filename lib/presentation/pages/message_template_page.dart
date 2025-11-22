@@ -29,6 +29,7 @@ class _MessageTemplatePageState extends ConsumerState<MessageTemplatePage> {
   void initState() {
     super.initState();
     Future.microtask(() async {
+      ref.invalidate(whatsappTemplateProvider);
       final tpl = await ref.read(whatsappTemplateProvider.future);
       _controller.text = tpl;
     });
@@ -58,6 +59,7 @@ class _MessageTemplatePageState extends ConsumerState<MessageTemplatePage> {
     } catch (_) {
       // silencioso: backup automático depende de login/configuração
     }
+    ref.invalidate(whatsappTemplateProvider);
     setState(() => _saving = false);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Template salvo')));

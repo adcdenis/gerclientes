@@ -48,6 +48,21 @@ android {
             storeFile file(keyProperties['storeFile'])
             storePassword keyProperties['storePassword']
         }
+        debug {
+            def keyProperties = new Properties()
+            def keyPropertiesFile = rootProject.file("key.properties")
+            if (keyPropertiesFile.exists()) {
+                keyProperties.load(new FileInputStream(keyPropertiesFile))
+            }
+            def debugStore = keyProperties['storeFileDebug'] ?: keyProperties['storeFile']
+            def debugAlias = keyProperties['keyAliasDebug'] ?: keyProperties['keyAlias']
+            def debugStorePass = keyProperties['storePasswordDebug'] ?: keyProperties['storePassword']
+            def debugKeyPass = keyProperties['keyPasswordDebug'] ?: keyProperties['keyPassword']
+            keyAlias debugAlias
+            keyPassword debugKeyPass
+            storeFile file(debugStore)
+            storePassword debugStorePass
+        }
     }
 
     defaultConfig {
@@ -63,6 +78,7 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
+            // usa o mesmo keystore do release para que o SHA-1 seja idêntico
             signingConfig signingConfigs.release
         }
     }

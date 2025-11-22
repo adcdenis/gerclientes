@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gerclientes/state/providers.dart';
 import 'package:intl/intl.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AppShell extends ConsumerWidget {
   final Widget child;
@@ -259,7 +260,6 @@ class _AppDrawer extends StatelessWidget {
               item(Icons.assignment_outlined, 'Relatórios', selectedIndex == 2, () => onNavigateIndex(2), cs.primary),
               item(Icons.dns_outlined, 'Servidores', selectedIndex == 4, () => onNavigateIndex(4), cs.tertiary),
               item(Icons.request_quote_outlined, 'Planos', selectedIndex == 5, () => onNavigateIndex(5), cs.error),
-              item(Icons.sync_alt, 'Backup', selectedIndex == 3, () => onNavigateIndex(3), cs.secondary),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: InkWell(
@@ -271,14 +271,15 @@ class _AppDrawer extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     decoration: BoxDecoration(color: cs.surfaceContainerHigh, borderRadius: BorderRadius.circular(14)),
-                    child: Row(children: const [
-                      Icon(Icons.message_outlined),
-                      SizedBox(width: 10),
-                      Text('Mensagem WhatsApp', style: TextStyle(fontWeight: FontWeight.w600)),
+                    child: Row(children: [
+                      FaIcon(FontAwesomeIcons.whatsapp, color: cs.secondary),
+                      const SizedBox(width: 10),
+                      const Text('Mensagem', style: TextStyle(fontWeight: FontWeight.w600)),
                     ]),
                   ),
                 ),
               ),
+              item(Icons.sync_alt, 'Backup', selectedIndex == 3, () => onNavigateIndex(3), cs.secondary),
             ]),
           ),
           const Padding(

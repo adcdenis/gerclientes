@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gerclientes/state/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:gerclientes/presentation/widgets/client_card.dart';
+import 'package:gerclientes/data/models/client_model.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -125,6 +127,7 @@ class DashboardPage extends ConsumerWidget {
                                     serverName: client.serverId != null ? (serverById[client.serverId] ?? '-') : '-',
                                     planName: client.planId != null ? (planById[client.planId] ?? '-') : '-',
                                     planValue: client.planId != null ? planValById[client.planId] : null,
+                                    onRenew: () => _renewClient(context, ref, client),
                                     onWhatsApp: () => _sendWhatsAppMessage(context, ref, client),
                                     // No delete or edit on dashboard for now, or maybe edit?
                                     // Keeping it simple as per request "visual do card"
@@ -316,3 +319,14 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 }
+  Future<void> _renewClient(BuildContext context, WidgetRef ref, Client client) async {
+    final newDue = client.dueDate.add(const Duration(days: 30));
+    final updated = client.copyWith(dueDate: newDue);
+    await ref.read(clientRepositoryProvider).update(updated);
+    ref.invalidate(clientsProvider);
+    final msg = 'Plano renovado com sucesso.  Próximo vencimento: ${DateFormat('dd/MM/yyyy').format(newDue)}';
+    await Clipboard.setData(ClipboardData(text: msg));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Renovado e mensagem copiada')));
+    }
+  }
