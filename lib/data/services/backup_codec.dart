@@ -35,11 +35,13 @@ class BackupCodec {
     final servers = await db.getAllServers();
     final plans = await db.getAllPlans();
     final clients = await db.getAllClients();
+    final settings = await db.getAllSettings();
     return {
-      'version': 1,
+      'version': 2,
       'servers': servers.map((c) => c.toJson()).toList(),
       'plans': plans.map((c) => c.toJson()).toList(),
       'clients': clients.map((c) => c.toJson()).toList(),
+      'settings': settings,
     };
   }
 
@@ -121,6 +123,7 @@ class BackupCodec {
       await db.customStatement('DELETE FROM clients');
       await db.customStatement('DELETE FROM servers');
       await db.customStatement('DELETE FROM plans');
+      await db.customStatement('DELETE FROM settings');
       // Ignora tabelas legadas: não deleta counters/categories
 
       // Ignora restauração de categorias e contadores legados
@@ -163,6 +166,15 @@ class BackupCodec {
           serverId: m['serverId'] != null ? (m['serverId'] as num).toInt() : null,
           planId: m['planId'] != null ? (m['planId'] as num).toInt() : null,
         );
+      }
+
+      // Recria Settings
+      final settings = (data['settings'] as List<dynamic>? ?? []);
+      for (final s in settings) {
+        final m = s as Map<String, dynamic>;
+        final key = (m['key'] as String?) ?? '';
+        final value = m['value'] as String?;
+        await db.setSetting(key, value);
       }
 
       // Histórico removido: nada a restaurar

@@ -260,6 +260,25 @@ class _AppDrawer extends StatelessWidget {
               item(Icons.dns_outlined, 'Servidores', selectedIndex == 4, () => onNavigateIndex(4), cs.tertiary),
               item(Icons.request_quote_outlined, 'Planos', selectedIndex == 5, () => onNavigateIndex(5), cs.error),
               item(Icons.sync_alt, 'Backup', selectedIndex == 3, () => onNavigateIndex(3), cs.secondary),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () {
+                    Scaffold.maybeOf(context)?.closeDrawer();
+                    context.go('/message-template');
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    decoration: BoxDecoration(color: cs.surfaceContainerHigh, borderRadius: BorderRadius.circular(14)),
+                    child: Row(children: const [
+                      Icon(Icons.message_outlined),
+                      SizedBox(width: 10),
+                      Text('Mensagem WhatsApp', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ]),
+                  ),
+                ),
+              ),
             ]),
           ),
           const Padding(

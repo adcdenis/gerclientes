@@ -23,6 +23,12 @@ final clientRepositoryProvider = Provider<ClientRepository>((ref) => ClientRepos
 final serversProvider = StreamProvider<List<Server>>((ref) => ref.watch(serverRepositoryProvider).watchAll());
 final plansProvider = StreamProvider<List<Plan>>((ref) => ref.watch(planRepositoryProvider).watchAll());
 final clientsProvider = StreamProvider<List<Client>>((ref) => ref.watch(clientRepositoryProvider).watchAll());
+final whatsappTemplateProvider = FutureProvider<String>((ref) async {
+  final db = ref.read(databaseProvider);
+  final tpl = await db.getSetting('whatsapp_template_vencimento');
+  if (tpl != null && tpl.trim().isNotEmpty) return tpl;
+  return 'Olá, {SAUDACAO}\n*Segue seu vencimento IPTV*\n*Vencimento:* _{VENCIMENTO}_\n\n*PLANO CONTRATADO*\n⭕ _Plano:_ *{PLANO}*\n⭕ _Valor:_ *R\$ {VALOR}*\n⭕ _Conta:_ *{USUARIO}*\n\n*FORMAS DE PAGAMENTOS*\n✅ Pic Pay : @canutobr\n✅ Banco do Brasil: ag 3020-1 cc 45746-9\n✅ Pix: canutopixbb@gmail.com\n\n- Duração da lista 30 dias, acesso de um ponto, não permite conexões simultâneas.\n- Assim que efetuar o pagamento, enviar o comprovante e vou efetuar a contratação/renovação o mais rápido possível.\n-*Aguardamos seu contato para renovação!*';
+});
 
 // Versão do aplicativo para exibir no rodapé do menu lateral
 final appVersionProvider = FutureProvider<String>((ref) async {

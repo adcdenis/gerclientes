@@ -147,39 +147,45 @@ class ClientsPage extends ConsumerWidget {
     return 'Boa noite';
   }
 
-  String _buildWhatsAppMessage({
+  String _renderWhatsAppMessage(String template, {
     required String clientName,
     required DateTime dueDate,
     String? planName,
     double? planValue,
     String? user,
+    String? serverName,
+    String? email,
+    String? phone,
+    String? observation,
+    int? id,
   }) {
     final greeting = _getGreeting();
     final dateFormatted = DateFormat('dd/MM/yyyy').format(dueDate);
-    
-    String message = 'Olá, $greeting\n';
-    message += '*Segue seu vencimento IPTV*\n';
-    message += '*Vencimento:* _${dateFormatted}_\n\n';
-    
-    if (planName != null && planValue != null) {
-      message += '*PLANO CONTRATADO*\n';
-      message += '⭕ _Plano:_ *$planName*\n';
-      message += '⭕ _Valor:_ *R\$ ${planValue.toStringAsFixed(2)}*\n';
-      if (user != null && user.isNotEmpty) {
-        message += '⭕ _Conta:_ *$user*\n';
-      }
-      message += '\n';
+    final currency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    final valorStr = planValue != null ? currency.format(planValue) : '';
+    final now = DateTime.now();
+    final dataAtual = DateFormat('dd/MM/yyyy').format(now);
+    final horaAtual = DateFormat('HH:mm').format(now);
+    final map = {
+      '{SAUDACAO}': greeting,
+      '{NOME}': clientName,
+      '{VENCIMENTO}': dateFormatted,
+      '{PLANO}': planName ?? '',
+      '{VALOR}': valorStr,
+      '{USUARIO}': user ?? '',
+      '{SERVIDOR}': serverName ?? '',
+      '{EMAIL}': email ?? '',
+      '{TELEFONE}': phone ?? '',
+      '{OBSERVACAO}': observation ?? '',
+      '{ID}': id?.toString() ?? '',
+      '{DATA_ATUAL}': dataAtual,
+      '{HORA_ATUAL}': horaAtual,
+    };
+    var out = template;
+    for (final e in map.entries) {
+      out = out.replaceAll(e.key, e.value);
     }
-    
-    message += '*FORMAS DE PAGAMENTOS*\n';
-    message += '✅ Pic Pay : @canutobr\n';
-    message += '✅ Banco do Brasil: ag 3020-1 cc 45746-9\n';
-    message += '✅ Pix: canutopixbb@gmail.com\n\n';
-    message += '- Duração da lista 30 dias, acesso de um ponto, não permite conexões simultâneas.\n';
-    message += '- Assim que efetuar o pagamento, enviar o comprovante e vou efetuar a contratação/renovação o mais rápido possível.\n';
-    message += '- *Aguardamos seu contato para renovação!*';
-    
-    return message;
+    return out.split('\n').where((l) => l.trim().isNotEmpty).join('\n');
   }
 
   Future<void> _sendWhatsAppMessage(BuildContext context, WidgetRef ref, Client client, List<dynamic> plans) async {
@@ -190,9 +196,10 @@ class ClientsPage extends ConsumerWidget {
       return;
     }
 
-    // Buscar dados do plano se existir
+    // Buscar dados do plano/servidor se existir
     String? planName;
     double? planValue;
+    String? serverName;
     
     if (client.planId != null) {
       final plan = plans.where((p) => p.id == client.planId).firstOrNull;
@@ -201,13 +208,26 @@ class ClientsPage extends ConsumerWidget {
         planValue = plan.value;
       }
     }
+    if (client.serverId != null) {
+      final servers = await ref.read(serversProvider.future);
+      final server = servers.where((s) => s.id == client.serverId).firstOrNull;
+      if (server != null) {
+        serverName = server.name;
+      }
+    }
 
-    final message = _buildWhatsAppMessage(
+    final template = await ref.read(whatsappTemplateProvider.future);
+    final message = _renderWhatsAppMessage(template,
       clientName: client.name,
       dueDate: client.dueDate,
       planName: planName,
       planValue: planValue,
       user: client.user,
+      serverName: serverName,
+      email: client.email,
+      phone: client.phone,
+      observation: client.observation,
+      id: client.id,
     );
 
     // Normalizar telefone (apenas dígitos) e evitar DDI duplicado

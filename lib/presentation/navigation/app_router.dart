@@ -10,6 +10,7 @@ import 'package:gerclientes/data/models/plan_model.dart';
 import '../pages/clients_page.dart';
 import 'package:gerclientes/data/models/client_model.dart';
 import '../widgets/app_shell.dart';
+import '../pages/message_template_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -82,6 +83,11 @@ class AppRouter {
             path: '/clients/:id/edit',
             name: 'client_edit',
             pageBuilder: (context, state) => MaterialPage(child: ClientFormPage(initialClient: state.extra as Client?)),
+          ),
+          GoRoute(
+            path: '/message-template',
+            name: 'message_template',
+            pageBuilder: (context, state) => const MaterialPage(child: MessageTemplatePage()),
           ),
         ],
       ),

@@ -45,6 +45,9 @@ class AppDatabase extends _$AppDatabase {
         beforeOpen: (details) async {
           // Garante que chaves estrangeiras estejam ativadas (necessário para CASCADE funcionar)
           await customStatement('PRAGMA foreign_keys = ON');
+          // Garante existência da tabela de configurações simples (settings)
+          await customStatement(
+              'CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)');
         },
         onCreate: (m) async {
           await m.createAll();
@@ -157,5 +160,39 @@ class AppDatabase extends _$AppDatabase {
       serverId: Value(serverId),
       planId: Value(planId),
     ));
+  }
+
+  // Configurações simples (settings)
+  Future<void> setSetting(String key, String? value) async {
+    final k = key.replaceAll("'", "''");
+    final v = (value ?? '').replaceAll("'", "''");
+    await customStatement(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES ('$k', '$v')");
+  }
+
+  Future<String?> getSetting(String key) async {
+    final k = key.replaceAll("'", "''");
+    final rows = await customSelect("SELECT value FROM settings WHERE key = '$k'").get();
+    if (rows.isEmpty) return null;
+    return rows.first.data['value'] as String?;
+  }
+
+  Future<List<Map<String, String?>>> getAllSettings() async {
+    final rows = await customSelect('SELECT key, value FROM settings').get();
+    return rows.map((r) => {
+          'key': r.data['key'] as String?,
+          'value': r.data['value'] as String?
+        }).toList();
+  }
+
+  Future<void> replaceAllSettings(List<Map<String, dynamic>> settings) async {
+    await transaction(() async {
+      await customStatement('DELETE FROM settings');
+      for (final s in settings) {
+        final k = (s['key'] as String?) ?? '';
+        final v = (s['value'] as String?) ?? '';
+        await setSetting(k, v);
+      }
+    });
   }
 }
