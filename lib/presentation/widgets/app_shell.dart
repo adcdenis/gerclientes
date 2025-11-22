@@ -21,11 +21,11 @@ class AppShell extends ConsumerWidget {
       });
     });
     return PopScope(
-      // Intercepta sempre o botão voltar para aplicar regra:
-      // voltar leva à listagem de contadores; somente nela perguntar para sair.
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) async {
-        // Se o Drawer estiver aberto, feche-o e não trate como "voltar" da página
+        // Intercepta sempre o botão voltar para aplicar regra:
+        // voltar leva à listagem de contadores; somente nela perguntar para sair.
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) async {
+          // Se o Drawer estiver aberto, feche-o e não trate como "voltar" da página
         final scaffoldState = Scaffold.maybeOf(context);
         if (scaffoldState?.isDrawerOpen == true) {
           scaffoldState!.closeDrawer();
@@ -49,7 +49,17 @@ class AppShell extends ConsumerWidget {
             SystemNavigator.pop();
           }
         } else {
-          router.go('/');
+          if (location.startsWith('/servers') && location != '/servers') {
+            router.go('/servers');
+          } else if (location.startsWith('/plans') && location != '/plans') {
+            router.go('/plans');
+          } else if (location.startsWith('/clients') && location != '/clients') {
+            router.go('/clients');
+          } else if (location.startsWith('/cloud-backup')) {
+            router.go('/backup');
+          } else {
+            router.go('/');
+          }
         }
       },
       child: LayoutBuilder(builder: (context, constraints) {
