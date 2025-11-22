@@ -58,7 +58,7 @@ class AppShell extends ConsumerWidget {
         final cs = Theme.of(context).colorScheme;
         final title = Row(
           children: const [
-            Icon(Icons.directions_run),
+            Icon(Icons.people),
             SizedBox(width: 8),
             Text('GerClientes'),
           ],
@@ -106,12 +106,12 @@ class AppShell extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: const [
                         Row(children: [
-                          Icon(Icons.directions_run),
+                          Icon(Icons.people),
                           SizedBox(width: 8),
                           Text('GerClientes', style: TextStyle(fontWeight: FontWeight.w600)),
                         ]),
                         SizedBox(height: 4),
-                        Text('Organize suas corridas', style: TextStyle(fontSize: 12)),
+                        Text('Gerencie clientes, planos e servidores', style: TextStyle(fontSize: 12)),
                       ],
                     ),
                   ),
@@ -232,12 +232,12 @@ class _AppDrawer extends StatelessWidget {
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
               Row(children: [
-                Icon(Icons.directions_run, size: 28),
+                Icon(Icons.people, size: 28),
                 SizedBox(width: 10),
                 Text('GerClientes', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
               ]),
               SizedBox(height: 4),
-              Text('Organize suas corridas', style: TextStyle(fontSize: 12)),
+              Text('Gerencie clientes, planos e servidores', style: TextStyle(fontSize: 12)),
             ]),
           ),
           Expanded(

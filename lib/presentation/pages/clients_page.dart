@@ -5,6 +5,7 @@ import 'package:gerclientes/state/providers.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:gerclientes/presentation/widgets/client_card.dart';
 
 class ClientsPage extends ConsumerWidget {
@@ -175,7 +176,7 @@ class ClientsPage extends ConsumerWidget {
     message += '✅ Pix: canutopixbb@gmail.com\n\n';
     message += '- Duração da lista 30 dias, acesso de um ponto, não permite conexões simultâneas.\n';
     message += '- Assim que efetuar o pagamento, enviar o comprovante e vou efetuar a contratação/renovação o mais rápido possível.\n';
-    message += '-*Aguardamos seu contato para renovação!*';
+    message += '- *Aguardamos seu contato para renovação!*';
     
     return message;
   }
@@ -208,21 +209,46 @@ class ClientsPage extends ConsumerWidget {
       user: client.user,
     );
 
-    // Limpar telefone (remover caracteres não numéricos)
-    final phone = client.phone!.replaceAll(RegExp(r'[^0-9]'), '');
-    
-    // Montar URL do WhatsApp Web
-    final encodedMessage = Uri.encodeComponent(message);
-    final url = Uri.parse('https://wa.me/55$phone?text=$encodedMessage');
+    // Normalizar telefone (apenas dígitos) e evitar DDI duplicado
+    var phone = client.phone!.replaceAll(RegExp(r'[^0-9]'), '');
+    if (phone.startsWith('55')) {
+      phone = phone.substring(2);
+    }
 
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+    if (phone.length < 10) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Não foi possível abrir o WhatsApp')),
+          const SnackBar(content: Text('Telefone inválido para WhatsApp')),
         );
       }
+      return;
+    }
+
+    final encodedMessage = Uri.encodeComponent(message);
+
+    // Tentar abrir via esquema nativo do WhatsApp
+    final whatsappUri = Uri.parse('whatsapp://send?phone=55$phone&text=$encodedMessage');
+    if (await canLaunchUrl(whatsappUri)) {
+      final ok = await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+      if (ok) return;
+    }
+
+    // Fallback 1: API WhatsApp via navegador/app
+    final webUri = Uri.parse('https://api.whatsapp.com/send?phone=55$phone&text=$encodedMessage');
+    if (await canLaunchUrl(webUri)) {
+      final ok = await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      if (ok) return;
+      // Fallback 1.1: abrir no WebView interno caso não haja navegador
+      final okInApp = await launchUrl(webUri, mode: LaunchMode.inAppWebView);
+      if (okInApp) return;
+    }
+
+    // Fallback 2: abrir folha de compartilhamento para o usuário escolher (inclui WhatsApp se instalado)
+    await Share.share(message);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Abrindo opções de compartilhamento (WhatsApp, etc.)')),
+      );
     }
   }
 
