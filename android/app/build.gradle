@@ -87,3 +87,49 @@ android {
 flutter {
     source '../..'
 }
+
+// Renomeia o APK de release para o formato:
+// NomeApp-<versao>-<AAAAmmdd_HHMMss>.apk
+tasks.register('renameReleaseApk') {
+    group = 'build'
+    dependsOn 'assembleRelease'
+    doLast {
+        def manifestText = file('src/main/AndroidManifest.xml').getText('UTF-8')
+        def m = (manifestText =~ /android:label="([^"]+)"/)
+        def label = m.find() ? m.group(1) : 'App'
+
+        def pubspecText = rootProject.file('../pubspec.yaml').getText('UTF-8')
+        def vm = (pubspecText =~ /version:\s*([\w\.\-\+]+)/)
+        def versionRaw = vm.find() ? vm.group(1) : '0.0.0+1'
+        def version = versionRaw.split('\\+')[0]
+
+        def timestamp = new java.text.SimpleDateFormat('yyyyMMdd_HHmmss').format(new Date())
+        def newName = "${label}-${version}-${timestamp}.apk"
+
+        // APK padrão do Gradle (módulo app)
+        def outputsDir = new File(buildDir, 'outputs/apk/release')
+        def standardApk = new File(outputsDir, 'app-release.apk')
+        if (standardApk.exists()) {
+            java.nio.file.Files.copy(
+                standardApk.toPath(),
+                new File(outputsDir, newName).toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            )
+        }
+
+        // APK gerado pelo Flutter
+        def flutterApkDir = new File(rootProject.projectDir, '../build/app/outputs/flutter-apk')
+        def flutterApk = new File(flutterApkDir, 'app-release.apk')
+        if (flutterApk.exists()) {
+            java.nio.file.Files.copy(
+                flutterApk.toPath(),
+                new File(flutterApkDir, newName).toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING
+            )
+        }
+    }
+}
+
+afterEvaluate {
+    tasks.findByName('assembleRelease')?.finalizedBy(tasks.findByName('renameReleaseApk'))
+}
