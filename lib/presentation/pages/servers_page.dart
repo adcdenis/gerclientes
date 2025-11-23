@@ -41,7 +41,7 @@ class ServersPage extends ConsumerWidget {
                         final s = sortedServers[i];
                         return ServerCard(
                           server: s,
-                          onTap: () => context.go('/servers/${s.id}/edit', extra: s),
+                          onTap: () => context.push('/servers/${s.id}/edit', extra: s),
                           onDelete: () => _confirmDelete(context, ref, s),
                         );
                       },
@@ -54,7 +54,7 @@ class ServersPage extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/servers/new'),
+        onPressed: () => context.push('/servers/new'),
         child: const Icon(Icons.add),
       ),
     );

@@ -41,7 +41,7 @@ class PlansPage extends ConsumerWidget {
                         final p = sortedPlans[i];
                         return PlanCard(
                           plan: p,
-                          onTap: () => context.go('/plans/${p.id}/edit', extra: p),
+                          onTap: () => context.push('/plans/${p.id}/edit', extra: p),
                           onDelete: () => _confirmDelete(context, ref, p),
                         );
                       },
@@ -54,7 +54,7 @@ class PlansPage extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/plans/new'),
+        onPressed: () => context.push('/plans/new'),
         child: const Icon(Icons.add),
       ),
     );

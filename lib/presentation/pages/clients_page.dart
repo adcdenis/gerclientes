@@ -117,7 +117,7 @@ class ClientsPage extends ConsumerWidget {
                                   serverName: c.serverId != null ? (serverById[c.serverId] ?? '-') : '-',
                                   planName: c.planId != null ? (planById[c.planId] ?? '-') : '-',
                                   planValue: c.planId != null ? planValById[c.planId] : null,
-                                  onTap: () => context.go('/clients/${c.id}/edit', extra: c),
+                                  onTap: () => context.push('/clients/${c.id}/edit', extra: c),
                                   onRenew: () => _renewClient(context, ref, c),
                                   onWhatsApp: () => _sendWhatsAppMessage(context, ref, c, plans),
                                   onDelete: () => _confirmDelete(context, ref, c),
@@ -136,7 +136,7 @@ class ClientsPage extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/clients/new'),
+        onPressed: () => context.push('/clients/new'),
         child: const Icon(Icons.add),
       ),
     );
@@ -276,11 +276,14 @@ class ClientsPage extends ConsumerWidget {
 
     final candidates = <Uri>[
       Uri.parse(hasText
+          ? 'intent://send?phone=55$phone&text=$encodedMessage#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end'
+          : 'intent://send?phone=55$phone#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end'),
+      Uri.parse(hasText
+          ? 'intent://send?phone=55$phone&text=$encodedMessage#Intent;scheme=whatsapp;package=com.whatsapp;end'
+          : 'intent://send?phone=55$phone#Intent;scheme=whatsapp;package=com.whatsapp;end'),
+      Uri.parse(hasText
           ? 'whatsapp://send?phone=55$phone&text=$encodedMessage'
           : 'whatsapp://send?phone=55$phone'),
-      Uri.parse(hasText
-          ? 'whatsapp-business://send?phone=55$phone&text=$encodedMessage'
-          : 'whatsapp-business://send?phone=55$phone'),
       Uri.parse(hasText
           ? 'https://api.whatsapp.com/send?phone=55$phone&text=$encodedMessage'
           : 'https://api.whatsapp.com/send?phone=55$phone'),

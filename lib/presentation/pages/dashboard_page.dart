@@ -256,11 +256,14 @@ class DashboardPage extends ConsumerWidget {
     final hasText = message.trim().isNotEmpty;
     final candidates = <Uri>[
       Uri.parse(hasText
+          ? 'intent://send?phone=55$phone&text=$encodedMessage#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end'
+          : 'intent://send?phone=55$phone#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end'),
+      Uri.parse(hasText
+          ? 'intent://send?phone=55$phone&text=$encodedMessage#Intent;scheme=whatsapp;package=com.whatsapp;end'
+          : 'intent://send?phone=55$phone#Intent;scheme=whatsapp;package=com.whatsapp;end'),
+      Uri.parse(hasText
           ? 'whatsapp://send?phone=55$phone&text=$encodedMessage'
           : 'whatsapp://send?phone=55$phone'),
-      Uri.parse(hasText
-          ? 'whatsapp-business://send?phone=55$phone&text=$encodedMessage'
-          : 'whatsapp-business://send?phone=55$phone'),
       Uri.parse(hasText
           ? 'https://api.whatsapp.com/send?phone=55$phone&text=$encodedMessage'
           : 'https://api.whatsapp.com/send?phone=55$phone'),
