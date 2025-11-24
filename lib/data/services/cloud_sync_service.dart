@@ -148,7 +148,10 @@ class NoopCloudSyncService implements CloudSyncService {
   @override
   Future<void> startRealtimeSync() async {
     if (!_auto) return;
-    _clientsSub ??= db.watchAllClients().skip(1).listen((_) => _onLocalChange());
+    _clientsSub ??= db
+        .watchAllClients()
+        .skip(1)
+        .listen((_) => _onLocalChange());
     // Política: não sincronizar por mudanças de categorias
   }
 
@@ -160,16 +163,13 @@ class NoopCloudSyncService implements CloudSyncService {
     _debounce = null;
   }
 
-  void _onLocalChange() {
+  Future<void> _onLocalChange() async {
     if (!_auto) return;
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(seconds: 10), () async {
-      try {
-        await backupNow();
-      } catch (_) {
-        // silencioso em modo Noop
-      }
-    });
+    try {
+      await backupNow();
+    } catch (_) {
+      // silencioso em modo Noop
+    }
   }
 }
 
