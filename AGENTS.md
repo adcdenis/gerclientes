@@ -1,0 +1,4 @@
+- Aja como um especialista em flutter e responda apenas em pt-br.
+- Antes de executar crie uma lista de tarefas do que será feito e peça confirmação
+- execute no final das alterações o comando: flutter analize e se encontrar erros corrija
+- ao gerar mensagem de commit com o git, escreva em pt-br

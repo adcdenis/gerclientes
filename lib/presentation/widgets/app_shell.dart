@@ -59,10 +59,25 @@ class AppShell extends ConsumerWidget {
         final selectedIndex = _selectedIndexForLocation(GoRouterState.of(context).uri.toString());
         final cs = Theme.of(context).colorScheme;
         final title = Row(
-          children: const [
-            Icon(Icons.people),
-            SizedBox(width: 8),
-            Text('GerClientes'),
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    spreadRadius: 1,
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Icon(Icons.person_pin, color: Colors.blue, size: 24),
+            ),
+            const SizedBox(width: 8),
+            const Text('GerClientes'),
           ],
         );
 
@@ -106,14 +121,29 @@ class AppShell extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Row(children: [
-                          Icon(Icons.people),
-                          SizedBox(width: 8),
-                          Text('GerClientes', style: TextStyle(fontWeight: FontWeight.w600)),
+                          Container(
+                            padding: const EdgeInsets.all(4.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withValues(alpha: 0.3),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.person_pin, color: Colors.blue, size: 24),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('GerClientes', style: TextStyle(fontWeight: FontWeight.w600)),
                         ]),
-                        SizedBox(height: 4),
-                        Text('Gerencie clientes, planos e servidores', style: TextStyle(fontSize: 12)),
+                        const SizedBox(height: 4),
+                        const Text('Gerencie clientes, planos e servidores', style: TextStyle(fontSize: 12)),
                       ],
                     ),
                   ),
@@ -123,12 +153,12 @@ class AppShell extends ConsumerWidget {
                   child: _VersionFooter(),
                 ),
                 destinations: [
-                  NavigationRailDestination(icon: Icon(Icons.dashboard_outlined, color: cs.primary), selectedIcon: Icon(Icons.dashboard, color: cs.primary), label: const Text('Dashboard')),
-                  NavigationRailDestination(icon: Icon(Icons.people_outline, color: cs.secondary), selectedIcon: Icon(Icons.people, color: cs.secondary), label: const Text('Clientes')),
-                  NavigationRailDestination(icon: Icon(Icons.assignment_outlined, color: cs.primary), selectedIcon: Icon(Icons.assignment, color: cs.primary), label: const Text('Relatórios')),
-                  NavigationRailDestination(icon: Icon(Icons.sync_alt, color: cs.secondary), selectedIcon: Icon(Icons.sync, color: cs.secondary), label: const Text('Backup')),
-                  NavigationRailDestination(icon: Icon(Icons.dns_outlined, color: cs.tertiary), selectedIcon: Icon(Icons.dns, color: cs.tertiary), label: const Text('Servidores')),
-                  NavigationRailDestination(icon: Icon(Icons.request_quote_outlined, color: cs.error), selectedIcon: Icon(Icons.request_quote, color: cs.error), label: const Text('Planos')),
+                  NavigationRailDestination(icon: Icon(Icons.dashboard_outlined, color: cs.primary), selectedIcon: Icon(Icons.dashboard, color: cs.primary), label: Text('Dashboard')),
+                  NavigationRailDestination(icon: Icon(Icons.people_outline, color: cs.secondary), selectedIcon: Icon(Icons.people, color: cs.secondary), label: Text('Clientes')),
+                  NavigationRailDestination(icon: Icon(Icons.assignment_outlined, color: cs.primary), selectedIcon: Icon(Icons.assignment, color: cs.primary), label: Text('Relatórios')),
+                  NavigationRailDestination(icon: Icon(Icons.sync_alt, color: cs.secondary), selectedIcon: Icon(Icons.sync, color: cs.secondary), label: Text('Backup')),
+                  NavigationRailDestination(icon: Icon(Icons.dns_outlined, color: cs.tertiary), selectedIcon: Icon(Icons.dns, color: cs.tertiary), label: Text('Servidores')),
+                  NavigationRailDestination(icon: Icon(Icons.request_quote_outlined, color: cs.error), selectedIcon: Icon(Icons.request_quote, color: cs.error), label: Text('Planos')),
                 ],
               ),
               const VerticalDivider(width: 1),
@@ -232,14 +262,29 @@ class _AppDrawer extends StatelessWidget {
                 colors: [cs.primaryContainer, cs.secondaryContainer],
               ),
             ),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                Icon(Icons.people, size: 28),
-                SizedBox(width: 10),
-                Text('GerClientes', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                Container(
+                  padding: const EdgeInsets.all(4.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.person_pin, color: Colors.blue, size: 28),
+                ),
+                const SizedBox(width: 10),
+                const Text('GerClientes', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
               ]),
-              SizedBox(height: 4),
-              Text('Gerencie clientes, planos e servidores', style: TextStyle(fontSize: 12)),
+              const SizedBox(height: 4),
+              const Text('Gerencie clientes, planos e servidores', style: TextStyle(fontSize: 12)),
             ]),
           ),
           Expanded(

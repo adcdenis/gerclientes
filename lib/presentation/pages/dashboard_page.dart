@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gerclientes/state/providers.dart';
-import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:gerclientes/presentation/widgets/client_card.dart';
-import 'package:gerclientes/data/models/client_model.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -127,14 +122,7 @@ class DashboardPage extends ConsumerWidget {
                                     serverName: client.serverId != null ? (serverById[client.serverId] ?? '-') : '-',
                                     planName: client.planId != null ? (planById[client.planId] ?? '-') : '-',
                                     planValue: client.planId != null ? planValById[client.planId] : null,
-                                    onRenew: () => _renewClient(context, ref, client),
-                                    onWhatsApp: () => _sendWhatsAppMessage(context, ref, client),
-                                    // No delete or edit on dashboard for now, or maybe edit?
-                                    // Keeping it simple as per request "visual do card"
-                                    // But dashboard usually allows quick actions.
-                                    // The original code had ONLY whatsapp.
-                                    // I will keep only whatsapp to match original functionality but with new design.
-                                    showActions: true,
+                                    showActions: false,
                                   );
                                 },
                               ),
@@ -159,127 +147,7 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Bom dia';
-    if (hour < 18) return 'Boa tarde';
-    return 'Boa noite';
-  }
 
-  String _renderWhatsAppMessage(String template, {
-    required String clientName,
-    required DateTime dueDate,
-    String? planName,
-    double? planValue,
-    String? user,
-    String? serverName,
-    String? email,
-    String? phone,
-    String? observation,
-    int? id,
-  }) {
-    final greeting = _getGreeting();
-    final dateFormatted = DateFormat('dd/MM/yyyy').format(dueDate);
-    final currency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-    final valorStr = planValue != null ? currency.format(planValue) : '';
-    final now = DateTime.now();
-    final dataAtual = DateFormat('dd/MM/yyyy').format(now);
-    final horaAtual = DateFormat('HH:mm').format(now);
-    final map = {
-      '{SAUDACAO}': greeting,
-      '{NOME}': clientName,
-      '{VENCIMENTO}': dateFormatted,
-      '{PLANO}': planName ?? '',
-      '{VALOR}': valorStr,
-      '{USUARIO}': user ?? '',
-      '{SERVIDOR}': serverName ?? '',
-      '{EMAIL}': email ?? '',
-      '{TELEFONE}': phone ?? '',
-      '{OBSERVACAO}': observation ?? '',
-      '{ID}': id?.toString() ?? '',
-      '{DATA_ATUAL}': dataAtual,
-      '{HORA_ATUAL}': horaAtual,
-    };
-    var out = template;
-    for (final e in map.entries) {
-      out = out.replaceAll(e.key, e.value);
-    }
-    return out.split('\n').where((l) => l.trim().isNotEmpty).join('\n');
-  }
-
-  Future<void> _sendWhatsAppMessage(BuildContext context, WidgetRef ref, dynamic client) async {
-    if (client.phone == null || client.phone!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cliente não possui telefone cadastrado')),
-      );
-      return;
-    }
-
-    String? planName;
-    double? planValue;
-    String? serverName;
-    if (client.planId != null) {
-      final plans = await ref.read(plansProvider.future);
-      final plan = plans.where((p) => p.id == client.planId).firstOrNull;
-      if (plan != null) {
-        planName = plan.name;
-        planValue = plan.value;
-      }
-    }
-    if (client.serverId != null) {
-      final servers = await ref.read(serversProvider.future);
-      final server = servers.where((s) => s.id == client.serverId).firstOrNull;
-      if (server != null) {
-        serverName = server.name;
-      }
-    }
-
-    final template = await ref.read(whatsappTemplateProvider.future);
-    final message = _renderWhatsAppMessage(
-      template,
-      clientName: client.name,
-      dueDate: client.dueDate,
-      planName: planName,
-      planValue: planValue,
-      user: client.user,
-      serverName: serverName,
-      email: client.email,
-      phone: client.phone,
-      observation: client.observation,
-      id: client.id,
-    );
-    var phone = client.phone!.replaceAll(RegExp(r'[^0-9]'), '');
-    if (phone.startsWith('55')) {
-      phone = phone.substring(2);
-    }
-    final encodedMessage = Uri.encodeComponent(message);
-    final hasText = message.trim().isNotEmpty;
-    final candidates = <Uri>[
-      Uri.parse(hasText
-          ? 'intent://send?phone=55$phone&text=$encodedMessage#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end'
-          : 'intent://send?phone=55$phone#Intent;scheme=whatsapp;package=com.whatsapp.w4b;end'),
-      Uri.parse(hasText
-          ? 'intent://send?phone=55$phone&text=$encodedMessage#Intent;scheme=whatsapp;package=com.whatsapp;end'
-          : 'intent://send?phone=55$phone#Intent;scheme=whatsapp;package=com.whatsapp;end'),
-      Uri.parse(hasText
-          ? 'whatsapp://send?phone=55$phone&text=$encodedMessage'
-          : 'whatsapp://send?phone=55$phone'),
-      Uri.parse(hasText
-          ? 'https://api.whatsapp.com/send?phone=55$phone&text=$encodedMessage'
-          : 'https://api.whatsapp.com/send?phone=55$phone'),
-    ];
-    for (final uri in candidates) {
-      if (await canLaunchUrl(uri)) {
-        if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
-      }
-    }
-    await Share.share(message);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Abrindo opções de compartilhamento (WhatsApp, etc.)')),
-      );
-    }
-  }
 
   Widget _statCard(
     BuildContext context, {
@@ -322,14 +190,3 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 }
-  Future<void> _renewClient(BuildContext context, WidgetRef ref, Client client) async {
-    final newDue = client.dueDate.add(const Duration(days: 30));
-    final updated = client.copyWith(dueDate: newDue);
-    await ref.read(clientRepositoryProvider).update(updated);
-    ref.invalidate(clientsProvider);
-    final msg = 'Plano renovado com sucesso.  Próximo vencimento: ${DateFormat('dd/MM/yyyy').format(newDue)}';
-    await Clipboard.setData(ClipboardData(text: msg));
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Renovado e mensagem copiada')));
-    }
-  }
